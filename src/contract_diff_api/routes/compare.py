@@ -1,3 +1,5 @@
+import logging
+
 from fastapi import APIRouter, Depends, File, UploadFile
 from fastapi.responses import JSONResponse, Response
 
@@ -7,6 +9,7 @@ from contract_diff.core.services.contract_diff_engine import ContractDiffEngine
 from contract_diff_api.schemas.error_response import ErrorResponse
 from contract_diff_api.services.engine_factory import get_engine
 
+logger = logging.getLogger(__name__)
 router = APIRouter()
 
 
@@ -25,6 +28,9 @@ async def compare_documents(
 ) -> Response:
     original_pdf = await original_file.read()
     revised_pdf = await revised_file.read()
+
+    logger.debug("original bytes: %s", len(original_pdf))
+    logger.debug("revised bytes: %s", len(revised_pdf))
 
     result = engine.compare(
         original_pdf,

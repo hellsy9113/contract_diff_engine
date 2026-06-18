@@ -5,6 +5,7 @@ from difflib import SequenceMatcher
 
 from contract_diff.comparison.enums.fragment_operation import FragmentOperation
 from contract_diff.comparison.models.text_fragment import TextFragment
+from contract_diff.comparison.utils.text_diff_helpers import normalize_for_alignment
 
 
 class TextDiffService:
@@ -18,8 +19,8 @@ class TextDiffService:
 
     def equivalent(self, original_text: str, revised_text: str) -> bool:
         return (
-            self.normalize_for_comparison(original_text)
-            == self.normalize_for_comparison(revised_text)
+            normalize_for_alignment(original_text)
+            == normalize_for_alignment(revised_text)
         )
 
     def normalize_for_comparison(self, text: str) -> str:

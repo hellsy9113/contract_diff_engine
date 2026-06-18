@@ -26,11 +26,12 @@ Revised PDF
 
 Output:
 
-* Yellow highlights → Modified clauses
-* Red highlights → Removed clauses
+* Soft amber highlights → Modified revised-side fragments
+* Soft green highlights → Added revised-side text
+* Red left-margin marker → Removed clauses anchored near revised text
 * No highlight → Unchanged clauses
-* Annotation bubble → Original clause text
-* Metadata appendix → Page number, heading, section, etc.
+* PDF annotation metadata → Change type and concise summary
+* Metadata appendix → Disabled in the main renderer until compact layout exists
 * Unique annotation IDs
 
 ---
@@ -40,7 +41,11 @@ Output:
 ```text
 Extraction
     ↓
+Normalization
+    ↓
 Structural Parsing
+    ↓
+Document Similarity Gate
     ↓
 Alignment
     ↓
@@ -56,6 +61,9 @@ Annotated PDF
     ↓
 Report Generator
 ```
+
+Current rendering intentionally avoids `Text`, `Square`, `FreeText`, and `Rect`
+annotation types because they create noisy icons or body-overlapping boxes.
 
 ---
 

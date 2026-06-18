@@ -2,17 +2,18 @@ from contract_diff.comparison.enums.fragment_operation import FragmentOperation
 from contract_diff.comparison.services.text_diff_service import TextDiffService
 
 
-def test_equivalent_collapses_whitespace_but_preserves_case() -> None:
+def test_equivalent_uses_alignment_normalization() -> None:
     service = TextDiffService()
 
     assert service.equivalent(
         "The Buyer shall pay within 30 days.",
         "The   Buyer shall pay\nwithin 30 days.",
     )
-    assert not service.equivalent(
+    assert service.equivalent(
         "The Buyer shall pay within 30 days.",
         "the Buyer shall pay within 30 days.",
     )
+    assert service.equivalent("Grover's algorithm.", "Grover’s algorithm.")
 
 
 def test_word_level_diff_returns_fragments() -> None:

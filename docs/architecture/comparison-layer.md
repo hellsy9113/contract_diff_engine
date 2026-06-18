@@ -132,22 +132,24 @@ deleted
 replaced
 ```
 
-For MVP, the renderer can highlight the entire modified revised clause in
-yellow while popup/appendix text explains the old text. Later versions can use
-fragments for more granular inline highlights.
+The renderer now consumes revised-side inserted fragments for modified changes
+and avoids highlighting entire paragraphs when only a phrase changed. The
+comparison layer still does not decide colors or PDF geometry; it only preserves
+the fragment data needed by rendering.
 
 ## Text Equivalence
 
-MVP equivalence:
+Current equivalence:
 
 ```text
 - collapse whitespace
 - trim spaces
-- preserve case
+- casefold for matching
+- normalize smart quotes and common hyphen variants
 ```
 
-Do not aggressively remove punctuation. Do not remove numbering unless the
-parser already separates the clause number from the body.
+Normalization is used for matching/alignment decisions only. User-facing text
+and rendering search text continue to use extracted source text.
 
 ## Diff Algorithm
 

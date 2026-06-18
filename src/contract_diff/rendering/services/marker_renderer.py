@@ -6,12 +6,12 @@ import fitz  # type: ignore[import-untyped]
 from contract_diff.annotation.enums.annotation_type import AnnotationType
 from contract_diff.annotation.models.annotation_item import AnnotationItem
 from contract_diff.models.document.bounding_box import BoundingBox
-from contract_diff.rendering.styles.pdf_colors import RED
+from contract_diff.rendering.styles.pdf_colors import style_for_annotation_type
 
 
 class MarkerRenderer:
     """
-    Draws red deletion markers near revised anchor clauses.
+    Deletion marker renderer.
     """
 
     def render(
@@ -36,11 +36,16 @@ class MarkerRenderer:
         if bbox is None:
             return warnings
 
-        marker = page.add_rect_annot(self._marker_rect(page, bbox))
-        marker.set_colors(stroke=RED, fill=RED)
-        marker.set_info(title=annotation.id, content=annotation.popup_text)
+        # TODO(v2): Replace deletion margin markers with sidebar deletion callouts.
+        marker = page.add_underline_annot(self._margin_marker_rect(bbox))
+        style = style_for_annotation_type(annotation.annotation_type)
+        marker.set_colors(stroke=style.color)
+        marker.set_opacity(style.opacity)
+        marker.set_info(
+            title=annotation.id,
+            content=self._annotation_content(annotation),
+        )
         marker.update()
-
         return warnings
 
     def _page(self, pdf_document: Any, page_number: int) -> Any | None:
@@ -69,9 +74,16 @@ class MarkerRenderer:
 
         return None, tuple(warnings)
 
-    def _marker_rect(self, page: Any, bbox: BoundingBox) -> fitz.Rect:
-        x1 = max(4.0, bbox.x0 - 6.0)
-        x0 = max(0.0, x1 - 8.0)
-        y0 = max(0.0, bbox.y0)
-        y1 = min(float(page.rect.height), y0 + 12.0)
-        return fitz.Rect(x0, y0, x1, y1)
+    def _margin_marker_rect(self, bbox: BoundingBox) -> fitz.Rect:
+        y0 = max(0.0, bbox.y0 + 2.0)
+        y1 = y0 + 5.0
+        return fitz.Rect(24.0, y0, 44.0, y1)
+
+    def _annotation_content(self, annotation: AnnotationItem) -> str:
+        summary = annotation.original_text or annotation.revised_text or ""
+        summary = " ".join(summary.split())
+
+        if len(summary) > 140:
+            summary = f"{summary[:137]}..."
+
+        return f"Deleted: {summary}" if summary else "Deleted"

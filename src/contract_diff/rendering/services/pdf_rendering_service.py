@@ -1,3 +1,4 @@
+from io import BytesIO
 from typing import BinaryIO
 
 import fitz  # type: ignore[import-untyped]
@@ -10,6 +11,10 @@ from contract_diff.rendering.services.appendix_renderer import AppendixRenderer
 from contract_diff.rendering.services.highlight_renderer import HighlightRenderer
 from contract_diff.rendering.services.marker_renderer import MarkerRenderer
 from contract_diff.rendering.services.popup_renderer import PopupRenderer
+from contract_diff.rendering.utils.visual_diagnostics import (
+    collect_visual_diagnostics,
+    print_dense_page_warnings,
+)
 
 
 class PdfRenderingService:
@@ -55,16 +60,23 @@ class PdfRenderingService:
                         span_boxes,
                     )
                 )
-                warnings.extend(
-                    self._popup_renderer.render(
-                        pdf_document,
-                        annotation,
-                        span_boxes,
-                    )
-                )
+                # TODO(v2): Reintroduce richer deletion callouts/sidebar after
+                # non-overlapping layout is implemented.
+                # self._popup_renderer.render(pdf_document, annotation, span_boxes)
 
-            self._appendix_renderer.render(pdf_document, annotation_plan)
-            rendered_bytes = pdf_document.tobytes(garbage=4, deflate=True)
+            visual_diagnostics = collect_visual_diagnostics(pdf_document)
+            print_dense_page_warnings(visual_diagnostics)
+            warnings.extend(
+                f"DENSE_HIGHLIGHTS_PAGE:{page_number}"
+                for page_number in visual_diagnostics.dense_pages
+            )
+
+            # TODO(v2): Re-enable appendix generation after compact appendix
+            # layout is implemented.
+            # self._appendix_renderer.render(pdf_document, annotation_plan)
+            output = BytesIO()
+            pdf_document.save(output, garbage=4, deflate=True)
+            rendered_bytes = output.getvalue()
 
         return RenderedDocument(
             filename=self._rendered_filename(extracted_revised_document),
@@ -76,7 +88,14 @@ class PdfRenderingService:
         if isinstance(revised_pdf_stream, bytes):
             return revised_pdf_stream
 
-        return revised_pdf_stream.read()
+        position = revised_pdf_stream.tell()
+
+        try:
+            revised_pdf_stream.seek(0)
+            return revised_pdf_stream.read()
+
+        finally:
+            revised_pdf_stream.seek(position)
 
     def _span_boxes(
         self,

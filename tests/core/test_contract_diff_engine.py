@@ -65,8 +65,8 @@ class MissingSpanAnnotationBuilder(AnnotationBuilderService):
     def build(self, comparison_result: ComparisonResult) -> AnnotationPlan:
         annotation = AnnotationItem(
             id="ANN-1",
-            annotation_type=AnnotationType.MODIFIED,
-            style=HighlightStyle.MODIFIED_HIGHLIGHT,
+            annotation_type=AnnotationType.ADDED,
+            style=HighlightStyle.ADDED_HIGHLIGHT,
             target=AnnotationTarget(
                 clause_id="clause-1",
                 page_number=1,
@@ -74,7 +74,7 @@ class MissingSpanAnnotationBuilder(AnnotationBuilderService):
                 anchor_type="revised_clause",
             ),
             original_text="Payment shall be made within 30 days.",
-            revised_text="Payment shall be made within 45 days.",
+            revised_text=None,
             popup_text="Payment shall be made within 30 days.",
             heading="Payment Terms",
             page_number=1,
@@ -94,8 +94,8 @@ class MissingSpanAnnotationBuilder(AnnotationBuilderService):
             ),
             summary=AnnotationSummary(
                 total=1,
-                modified=1,
-                added=0,
+                modified=0,
+                added=1,
                 removed=0,
                 unresolved=0,
             ),
@@ -122,8 +122,9 @@ def test_successful_rendered_pdf_can_be_opened() -> None:
 
     assert result.rendered_document is not None
     document = fitz.open(stream=result.rendered_document.data, filetype="pdf")
-    assert document.page_count >= 2
-    assert "Annotation ANN-1" in document[-1].get_text()
+    assert document.page_count == 1
+    page = document[0]
+    assert list(page.annots() or [])
     document.close()
 
 
@@ -164,3 +165,76 @@ def test_engine_does_not_crash_on_missing_annotations() -> None:
     assert result.status is EngineStatus.SUCCESS
     assert result.rendered_document is not None
     assert "ANN-1:MISSING_SPAN:missing-span" in result.warnings
+
+
+def test_unnumbered_pdf_text_changes_use_line_level_fallback() -> None:
+    original = make_pdf(
+        (
+            "Introduction",
+            "Quantum search is discussed.",
+        )
+    )
+    revised = make_pdf(
+        (
+            "Introduction",
+            "Quantum search is discussed.",
+            "Grover's algorithm speeds unstructured search.",
+        )
+    )
+
+    result = ContractDiffEngine().compare(original, revised)
+
+    assert result.status is EngineStatus.SUCCESS
+    assert result.rendered_document is not None
+    assert "LINE_LEVEL_FALLBACK_COMPARISON" in result.warnings
+
+    document = fitz.open(stream=result.rendered_document.data, filetype="pdf")
+    page = document[0]
+    annotations = list(page.annots() or [])
+
+    assert annotations
+    assert document.page_count == 1
+    document.close()
+
+
+def test_output_uses_revised_pdf_as_visual_base() -> None:
+    original = make_pdf(
+        ("Shor's algorithm affects public key cryptography.",)
+    )
+    revised = make_pdf(
+        (
+            "Shor's algorithm affects public key cryptography. "
+            "Grover's algorithm also impacts symmetric security.",
+        )
+    )
+
+    result = ContractDiffEngine().compare(original, revised)
+
+    assert result.status is EngineStatus.SUCCESS
+    assert result.rendered_document is not None
+
+    document = fitz.open(stream=result.rendered_document.data, filetype="pdf")
+    assert "Grover's algorithm" in document[0].get_text()
+    document.close()
+
+
+def test_output_has_no_square_text_or_freetext_annotations() -> None:
+    result = ContractDiffEngine().compare(
+        similar_original_pdf(),
+        similar_revised_pdf(),
+    )
+
+    assert result.status is EngineStatus.SUCCESS
+    assert result.rendered_document is not None
+
+    document = fitz.open(stream=result.rendered_document.data, filetype="pdf")
+    unwanted_types = {"Text", "Square", "FreeText"}
+
+    for page in document:
+        annotation = page.first_annot
+
+        while annotation is not None:
+            assert annotation.type[1] not in unwanted_types
+            annotation = annotation.next
+
+    document.close()

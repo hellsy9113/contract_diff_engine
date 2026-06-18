@@ -26,9 +26,9 @@ The annotation layer decides what the renderer should do with those changes:
 | Change type | Annotation behavior |
 | --- | --- |
 | `unchanged` | No annotation |
-| `modified` | Highlight the revised clause |
+| `modified` | Highlight changed revised-side fragments |
 | `added` | Highlight the revised clause |
-| `removed` | Place a deletion marker near the revised anchor clause |
+| `removed` | Place a non-overlapping deletion marker near the revised anchor clause |
 
 ## Traceability
 
@@ -54,7 +54,8 @@ clauses, the target is the revised anchor clause.
 type, style, target, source texts, popup text, heading, fragments, and warnings.
 
 `AnnotationAppendixEntry` stores metadata that can later be rendered into an
-appendix or end section.
+appendix or end section. The main renderer currently bypasses appendix rendering
+until a compact appendix layout is implemented.
 
 `AnnotationPlan` is the top-level output consumed by the rendering layer. It
 contains annotation items, appendix entries, summary counts, and warnings.
@@ -70,3 +71,7 @@ The annotation layer names semantic styles only:
 | `removed` | `removed_marker` |
 
 The rendering layer maps those styles to actual PDF colors and drawing behavior.
+
+The rendering layer currently uses soft highlight colors, low opacity, duplicate
+rectangle filtering, and page-density diagnostics. It does not emit visible
+sticky-note, square, free-text, or rectangle annotations in the document body.
