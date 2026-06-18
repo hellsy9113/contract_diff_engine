@@ -1,0 +1,15 @@
+services:
+  contract-diff-engine:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: contract-diff-engine
+    ports:
+      - "8000:8000"
+    environment:
+      - FRONTEND_ORIGINS=http://localhost:3000,http://localhost:3001
+      - PYTHONUNBUFFERED=1
+    volumes:
+      - ./src:/app/src
+      - ./contract_diff_api:/app/contract_diff_api
+    command: uv run uvicorn contract_diff_api.main:app --host 0.0.0.0 --port 8000 --reload
