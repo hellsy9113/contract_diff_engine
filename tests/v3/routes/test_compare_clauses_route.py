@@ -104,6 +104,63 @@ def test_v3_route_passes_debug_flag(
     }
 
 
+def test_v3_route_accepts_legacy_compare_field_names(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    captured: dict[str, Any] = {}
+
+    def fake_compare(
+        original_file: bytes,
+        revised_file: bytes,
+        *,
+        original_filename: str | None,
+        revised_filename: str | None,
+        debug: bool,
+    ) -> V3ClauseCompareResponse:
+        captured["original"] = original_file
+        captured["revised"] = revised_file
+        captured["original_filename"] = original_filename
+        captured["revised_filename"] = revised_filename
+        captured["debug"] = debug
+        return V3ClauseCompareResponse(
+            summary=V3CompareSummary(
+                total_clauses=0,
+                unchanged_clauses=0,
+                changed_clauses=0,
+                added_clauses=0,
+                deleted_clauses=0,
+                modified_clauses=0,
+            ),
+            clauses=[],
+        )
+
+    monkeypatch.setattr(compare_clauses_route, "compare_clauses_v3", fake_compare)
+
+    asyncio.run(
+        endpoint(
+            original=None,
+            revised=None,
+            original_file=cast(
+                Any,
+                UploadFileDouble("legacy-original.pdf", b"%PDF original"),
+            ),
+            revised_file=cast(
+                Any,
+                UploadFileDouble("legacy-revised.pdf", b"%PDF revised"),
+            ),
+            debug=False,
+        )
+    )
+
+    assert captured == {
+        "original": b"%PDF original",
+        "revised": b"%PDF revised",
+        "original_filename": "legacy-original.pdf",
+        "revised_filename": "legacy-revised.pdf",
+        "debug": False,
+    }
+
+
 class UploadFileDouble:
     def __init__(self, filename: str, data: bytes) -> None:
         self.filename = filename
