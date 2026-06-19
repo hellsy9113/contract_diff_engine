@@ -3,6 +3,7 @@ import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from contract_diff.v3.routes.compare_clauses import router as compare_clauses_router
 from contract_diff_api.routes.compare import router as compare_router
 
 DEFAULT_FRONTEND_ORIGINS = (
@@ -42,6 +43,7 @@ app = FastAPI(
 )
 
 app.include_router(compare_router)
+app.include_router(compare_clauses_router)
 
 
 @app.get("/health")
