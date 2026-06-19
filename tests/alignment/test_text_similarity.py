@@ -3,8 +3,7 @@ from contract_diff.alignment.scoring.text_similarity import TextSimilarity
 
 def test_exact_text_scores_100() -> None:
     assert (
-        TextSimilarity.score("Payment shall be made.", "Payment shall be made.")
-        == 100
+        TextSimilarity.score("Payment shall be made.", "Payment shall be made.") == 100
     )
 
 

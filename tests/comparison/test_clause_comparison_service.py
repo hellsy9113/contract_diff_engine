@@ -170,9 +170,7 @@ def test_heading_comes_from_revised_section_when_available() -> None:
         original_sections={
             section.id: section for section in original_document.sections
         },
-        revised_sections={
-            section.id: section for section in revised_document.sections
-        },
+        revised_sections={section.id: section for section in revised_document.sections},
     )
 
     assert compared.heading == "Payment Terms"

@@ -8,13 +8,16 @@ from contract_diff.extraction.structured.columns import (
 )
 from contract_diff.extraction.structured.models import (
     BoundingBox,
+    DocumentWordStream,
     ExtractedPage,
     ExtractedWord,
+    PageInfo,
     PdfIntakeReport,
     StructuredDocument,
     TextBlock,
     TextLine,
     TextSpan,
+    WordToken,
 )
 from contract_diff.extraction.structured.pdf_profiler import profile_pdf
 from contract_diff.extraction.structured.pipeline import (
@@ -34,19 +37,29 @@ from contract_diff.extraction.structured.structured_pdf_reader import (
     merge_bboxes,
     normalize_for_alignment,
 )
+from contract_diff.extraction.structured.word_stream import build_document_word_stream
+from contract_diff.extraction.structured.word_tokens import (
+    build_word_tokens,
+    normalize_word_token_text,
+)
 
 __all__ = [
     "BoundingBox",
+    "DocumentWordStream",
     "ExtractedPage",
     "ExtractedWord",
+    "PageInfo",
     "PdfIntakeReport",
     "StructuredDocument",
     "TextBlock",
     "TextLine",
     "TextSpan",
+    "WordToken",
     "apply_column_detection",
     "assign_section_paths",
     "bbox_from_tuple",
+    "build_document_word_stream",
+    "build_word_tokens",
     "classify_block",
     "classify_blocks",
     "detect_columns_for_page",
@@ -57,6 +70,7 @@ __all__ = [
     "get_document_comparison_text",
     "merge_bboxes",
     "normalize_for_alignment",
+    "normalize_word_token_text",
     "profile_pdf",
     "process_structured_document",
     "resolve_reading_order",

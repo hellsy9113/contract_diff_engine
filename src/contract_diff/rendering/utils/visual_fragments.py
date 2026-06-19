@@ -121,8 +121,7 @@ def _is_meaningful_word(word: str) -> bool:
         return _is_meaningful_numeric_word(word)
 
     return (
-        len(normalized) >= MIN_FRAGMENT_LENGTH
-        and normalized not in COMMON_VISUAL_WORDS
+        len(normalized) >= MIN_FRAGMENT_LENGTH and normalized not in COMMON_VISUAL_WORDS
     )
 
 

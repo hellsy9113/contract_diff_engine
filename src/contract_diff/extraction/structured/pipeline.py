@@ -12,14 +12,21 @@ from contract_diff.extraction.structured.sections import assign_section_paths
 from contract_diff.extraction.structured.structured_pdf_reader import (
     extract_structured_pdf,
 )
+from contract_diff.extraction.structured.word_tokens import build_word_tokens
 
 
 def extract_and_process_pdf(pdf_bytes: bytes) -> StructuredDocument:
     profile = profile_pdf(pdf_bytes)
     document = extract_structured_pdf(pdf_bytes)
     processed_document = process_structured_document(document)
+    word_tokens = build_word_tokens(processed_document)
     warnings = [*profile.warnings, *processed_document.warnings]
-    return processed_document.model_copy(update={"warnings": _dedupe(warnings)})
+    return processed_document.model_copy(
+        update={
+            "warnings": _dedupe(warnings),
+            "word_tokens": word_tokens,
+        }
+    )
 
 
 def process_structured_document(document: StructuredDocument) -> StructuredDocument:

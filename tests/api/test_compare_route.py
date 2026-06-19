@@ -1,5 +1,6 @@
 import asyncio
 import json
+from pathlib import Path
 from types import SimpleNamespace
 from typing import Any, cast
 
@@ -148,9 +149,17 @@ def test_compare_uses_v2_by_default(
 ) -> None:
     monkeypatch.delenv("CONTRACT_DIFF_COMPARE_ENGINE", raising=False)
 
-    def fake_compare_v2(original_pdf: bytes, revised_pdf: bytes) -> tuple[bytes, Any]:
+    def fake_compare_v2(
+        original_pdf: bytes,
+        revised_pdf: bytes,
+        **kwargs: Any,
+    ) -> tuple[bytes, Any]:
         assert original_pdf == b"%PDF original"
         assert revised_pdf == b"%PDF revised"
+        assert kwargs["original_filename"] == "original.pdf"
+        assert kwargs["revised_filename"] == "revised.pdf"
+        assert kwargs.get("debug", False) is False
+        assert kwargs["debug_output_path"] is None
         return b"%PDF v2", fake_report()
 
     monkeypatch.setattr(compare_route, "compare_pdf_bytes_v2", fake_compare_v2)
@@ -181,7 +190,10 @@ def test_compare_v2_route_returns_pdf(
     monkeypatch.setattr(
         compare_route,
         "compare_pdf_bytes_v2",
-        lambda _original, _revised: (b"%PDF direct v2", fake_report()),
+        lambda _original, _revised, **_kwargs: (
+            b"%PDF direct v2",
+            fake_report(),
+        ),
     )
 
     response = asyncio.run(
@@ -210,7 +222,10 @@ def test_invalid_engine_config_defaults_to_v2(
     monkeypatch.setattr(
         compare_route,
         "compare_pdf_bytes_v2",
-        lambda _original, _revised: (b"%PDF fallback v2", fake_report()),
+        lambda _original, _revised, **_kwargs: (
+            b"%PDF fallback v2",
+            fake_report(),
+        ),
     )
 
     response = call_compare(FailedEngine())
@@ -226,6 +241,43 @@ def test_engine_info_reports_active_engine(
     monkeypatch.setenv("CONTRACT_DIFF_COMPARE_ENGINE", "v2")
 
     assert engine_info() == {"compare_engine": "v2"}
+
+
+def test_compare_v2_route_passes_env_debug_output_path(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    debug_path = tmp_path / "diff-debug.json"
+
+    monkeypatch.setenv("DEBUG_DIFF", "true")
+    monkeypatch.setenv("DEBUG_DIFF_PATH", str(debug_path))
+
+    def fake_compare_v2(
+        _original_pdf: bytes,
+        _revised_pdf: bytes,
+        **kwargs: Any,
+    ) -> tuple[bytes, Any]:
+        assert kwargs.get("debug", False) is False
+        assert kwargs["debug_output_path"] == debug_path
+        return b"%PDF debug v2", fake_report()
+
+    monkeypatch.setattr(compare_route, "compare_pdf_bytes_v2", fake_compare_v2)
+
+    response = asyncio.run(
+        compare_documents_v2(
+            original_file=cast(
+                Any,
+                UploadFileDouble("original.pdf", b"%PDF original"),
+            ),
+            revised_file=cast(
+                Any,
+                UploadFileDouble("revised.pdf", b"%PDF revised"),
+            ),
+        )
+    )
+
+    assert response.status_code == 200
+    assert response.body == b"%PDF debug v2"
 
 
 def call_compare(engine: object) -> Response:

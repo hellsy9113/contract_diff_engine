@@ -60,8 +60,4 @@ class NormalizationService:
         return tuple(line.id for line in block.lines)
 
     def _span_ids(self, block: Block) -> tuple[str, ...]:
-        return tuple(
-            span.id
-            for line in block.lines
-            for span in line.spans
-        )
+        return tuple(span.id for line in block.lines for span in line.spans)

@@ -116,9 +116,7 @@ def test_modified_clauses_create_modified_annotation() -> None:
 
 
 def test_added_clauses_create_added_annotation() -> None:
-    comparison = make_comparison_result(
-        (make_compared_clause(ChangeType.ADDED, "1"),)
-    )
+    comparison = make_comparison_result((make_compared_clause(ChangeType.ADDED, "1"),))
 
     plan = AnnotationBuilderService().build(comparison)
 

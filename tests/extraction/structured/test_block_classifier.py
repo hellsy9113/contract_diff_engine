@@ -36,12 +36,15 @@ def test_list_item_is_detected() -> None:
 
 
 def test_paragraph_is_detected() -> None:
-    assert classify_block(
-        make_block(
-            "The receiving party shall protect confidential information using "
-            "commercially reasonable safeguards."
+    assert (
+        classify_block(
+            make_block(
+                "The receiving party shall protect confidential information using "
+                "commercially reasonable safeguards."
+            )
         )
-    ) == "paragraph"
+        == "paragraph"
+    )
 
 
 def test_noise_is_detected() -> None:

@@ -10,14 +10,10 @@ from tests.alignment.helpers import make_clause, make_document, make_section
 
 def test_alignment_matches_exact_clause_numbers() -> None:
     original = make_document(
-        (
-            make_clause("orig-1", "The Buyer shall pay within 30 days.", "3.2"),
-        )
+        (make_clause("orig-1", "The Buyer shall pay within 30 days.", "3.2"),)
     )
     revised = make_document(
-        (
-            make_clause("rev-1", "The Buyer shall pay within 45 days.", "3.2"),
-        )
+        (make_clause("rev-1", "The Buyer shall pay within 45 days.", "3.2"),)
     )
 
     result = AlignmentService().align(original, revised)
@@ -65,15 +61,11 @@ def test_alignment_marks_unmatched_original_and_revised_clauses() -> None:
 
 def test_alignment_rejects_low_similarity_documents() -> None:
     original = make_document(
-        (
-            make_clause("orig-1", "The employee may terminate employment.", "1.1"),
-        ),
+        (make_clause("orig-1", "The employee may terminate employment.", "1.1"),),
         sections=(make_section("section-1", "Employment"),),
     )
     revised = make_document(
-        (
-            make_clause("rev-1", "The software license is non-transferable.", "1.1"),
-        ),
+        (make_clause("rev-1", "The software license is non-transferable.", "1.1"),),
         sections=(make_section("section-1", "Software License"),),
     )
 
@@ -86,14 +78,10 @@ def test_alignment_rejects_low_similarity_documents() -> None:
 
 def test_alignment_result_is_json_serializable() -> None:
     original = make_document(
-        (
-            make_clause("orig-1", "The Buyer shall pay within 30 days.", "3.2"),
-        )
+        (make_clause("orig-1", "The Buyer shall pay within 30 days.", "3.2"),)
     )
     revised = make_document(
-        (
-            make_clause("rev-1", "The Buyer shall pay within 45 days.", "3.2"),
-        )
+        (make_clause("rev-1", "The Buyer shall pay within 45 days.", "3.2"),)
     )
 
     result = AlignmentService().align(original, revised)

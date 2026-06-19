@@ -71,9 +71,7 @@ def test_missing_span_ids_produce_warnings_not_crash() -> None:
         AnnotationType.ADDED,
         HighlightStyle.ADDED_HIGHLIGHT,
         span_ids=("missing-span",),
-    ).model_copy(
-        update={"revised_text": None}
-    )
+    ).model_copy(update={"revised_text": None})
     plan = make_annotation_plan((annotation,))
 
     rendered = PdfRenderingService().render(

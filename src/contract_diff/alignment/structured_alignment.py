@@ -17,6 +17,9 @@ def align_structured_blocks(
 ) -> list[BlockMatch]:
     """Align processed document blocks across the whole document."""
 
+    # TODO(v2-word-diff): Replace block-first matching with document-level
+    # traceable word alignment so pagination/block-boundary shifts do not turn
+    # unchanged words into added/deleted blocks.
     original_normalized = [_normalized_block_text(block) for block in original_blocks]
     revised_normalized = [_normalized_block_text(block) for block in revised_blocks]
 

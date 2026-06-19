@@ -29,15 +29,11 @@ def test_normalize_document_preserves_source_span_ids() -> None:
                         lines=(
                             Line(
                                 id="line-1",
-                                spans=(
-                                    Span(id="span-1", text="The Buyer shall pay"),
-                                ),
+                                spans=(Span(id="span-1", text="The Buyer shall pay"),),
                             ),
                             Line(
                                 id="line-2",
-                                spans=(
-                                    Span(id="span-2", text="within 30 days."),
-                                ),
+                                spans=(Span(id="span-2", text="within 30 days."),),
                             ),
                         ),
                     ),
@@ -84,9 +80,7 @@ def test_normalize_document_skips_empty_units_but_keeps_page() -> None:
                         lines=(
                             Line(
                                 id="line-1",
-                                spans=(
-                                    Span(id="span-1", text="   \n\t"),
-                                ),
+                                spans=(Span(id="span-1", text="   \n\t"),),
                             ),
                         ),
                     ),

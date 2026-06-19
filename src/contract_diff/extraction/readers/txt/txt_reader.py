@@ -64,9 +64,7 @@ class TxtReader(DocumentReader):
                 text = raw_bytes.decode("utf-8")
 
             except UnicodeDecodeError as exc:
-                raise InvalidDocumentError(
-                    "Text document is not valid UTF-8."
-                ) from exc
+                raise InvalidDocumentError("Text document is not valid UTF-8.") from exc
 
             metadata = DocumentMetadata(
                 filename=filename,

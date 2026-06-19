@@ -271,8 +271,7 @@ def _extract_pdf_text(path: Path) -> str:
 
 def _safe_stem(value: str) -> str:
     cleaned = "".join(
-        char if char.isalnum() else "-"
-        for char in value.strip().casefold()
+        char if char.isalnum() else "-" for char in value.strip().casefold()
     )
     cleaned = "-".join(part for part in cleaned.split("-") if part)
     return cleaned[:96] or "cuad-contract"

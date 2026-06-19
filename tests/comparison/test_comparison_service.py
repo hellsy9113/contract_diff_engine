@@ -71,9 +71,7 @@ def alignment_result(aligned_clauses: tuple[AlignedClause, ...]) -> AlignmentRes
             if clause.status is AlignmentStatus.REVISED_ONLY
         ),
         matched_count=sum(
-            1
-            for clause in aligned_clauses
-            if clause.status is AlignmentStatus.MATCHED
+            1 for clause in aligned_clauses if clause.status is AlignmentStatus.MATCHED
         ),
     )
 
@@ -165,19 +163,13 @@ def test_missing_clause_ids_create_warnings() -> None:
 
 def test_comparison_result_serializes_to_json() -> None:
     original = make_document(
-        (
-            make_clause("orig-1", "Payment shall be made within 30 days.", "1.1"),
-        )
+        (make_clause("orig-1", "Payment shall be made within 30 days.", "1.1"),)
     )
     revised = make_document(
-        (
-            make_clause("rev-1", "Payment shall be made within 45 days.", "1.1"),
-        )
+        (make_clause("rev-1", "Payment shall be made within 45 days.", "1.1"),)
     )
     alignment = alignment_result(
-        (
-            aligned_clause(AlignmentStatus.MATCHED, "orig-1", "rev-1", "rev-1"),
-        )
+        (aligned_clause(AlignmentStatus.MATCHED, "orig-1", "rev-1", "rev-1"),)
     )
 
     result = ComparisonService().compare(original, revised, alignment)

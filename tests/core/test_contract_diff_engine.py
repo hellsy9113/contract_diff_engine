@@ -198,9 +198,7 @@ def test_unnumbered_pdf_text_changes_use_line_level_fallback() -> None:
 
 
 def test_output_uses_revised_pdf_as_visual_base() -> None:
-    original = make_pdf(
-        ("Shor's algorithm affects public key cryptography.",)
-    )
+    original = make_pdf(("Shor's algorithm affects public key cryptography.",))
     revised = make_pdf(
         (
             "Shor's algorithm affects public key cryptography. "

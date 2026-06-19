@@ -1,5 +1,6 @@
 import logging
 import os
+from pathlib import Path
 from typing import Literal, cast
 
 from fastapi import APIRouter, Depends, File, UploadFile
@@ -37,7 +38,12 @@ async def compare_documents(
     logger.debug("revised bytes: %s", len(revised_pdf))
 
     if active_compare_engine_version() == "v2":
-        return _compare_v2_response(original_pdf, revised_pdf)
+        return _compare_v2_response(
+            original_pdf,
+            revised_pdf,
+            original_filename=original_file.filename or "original.pdf",
+            revised_filename=revised_file.filename or "revised.pdf",
+        )
 
     result = engine.compare(
         original_pdf,
@@ -62,7 +68,12 @@ async def compare_documents_v2(
 ) -> Response:
     original_pdf = await original_file.read()
     revised_pdf = await revised_file.read()
-    return _compare_v2_response(original_pdf, revised_pdf)
+    return _compare_v2_response(
+        original_pdf,
+        revised_pdf,
+        original_filename=original_file.filename or "original.pdf",
+        revised_filename=revised_file.filename or "revised.pdf",
+    )
 
 
 @router.get("/engine/info")
@@ -83,11 +94,22 @@ def active_compare_engine_version() -> CompareEngineVersion:
     return "v2"
 
 
-def _compare_v2_response(original_pdf: bytes, revised_pdf: bytes) -> Response:
-    output_pdf, report = compare_pdf_bytes_v2(original_pdf, revised_pdf)
+def _compare_v2_response(
+    original_pdf: bytes,
+    revised_pdf: bytes,
+    *,
+    original_filename: str | None = None,
+    revised_filename: str | None = None,
+) -> Response:
+    output_pdf, report = compare_pdf_bytes_v2(
+        original_pdf,
+        revised_pdf,
+        original_filename=original_filename,
+        revised_filename=revised_filename,
+        debug_output_path=_debug_diff_path(),
+    )
     logger.info(
-        "compare v2 result: confidence=%s added=%s deleted=%s modified=%s "
-        "uncertain=%s",
+        "compare v2 result: confidence=%s added=%s deleted=%s modified=%s uncertain=%s",
         report.comparison_quality.confidence,
         report.comparison_quality.added_count,
         report.comparison_quality.deleted_count,
@@ -101,11 +123,29 @@ def _compare_v2_response(original_pdf: bytes, revised_pdf: bytes) -> Response:
     )
 
 
+def _debug_diff_path() -> Path | None:
+    if not _truthy_env("DEBUG_DIFF"):
+        return None
+
+    configured_path = os.getenv("DEBUG_DIFF_PATH")
+
+    if configured_path:
+        return Path(configured_path)
+
+    return Path("diff-debug.json")
+
+
+def _truthy_env(name: str) -> bool:
+    value = os.getenv(name)
+
+    if value is None:
+        return False
+
+    return value.strip().casefold() in {"1", "true", "yes", "on"}
+
+
 def _response_for_result(result: EngineResult) -> Response:
-    if (
-        result.status is EngineStatus.SUCCESS
-        and result.rendered_document is not None
-    ):
+    if result.status is EngineStatus.SUCCESS and result.rendered_document is not None:
         return Response(
             content=result.rendered_document.data,
             media_type=result.rendered_document.content_type,
@@ -119,9 +159,7 @@ def _response_for_result(result: EngineResult) -> Response:
     if result.status is EngineStatus.REJECTED:
         return JSONResponse(
             status_code=422,
-            content=ErrorResponse.from_engine_result(result).model_dump(
-                mode="json"
-            ),
+            content=ErrorResponse.from_engine_result(result).model_dump(mode="json"),
         )
 
     return JSONResponse(

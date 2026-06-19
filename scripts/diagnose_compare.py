@@ -132,9 +132,7 @@ def _contains_revised_only_text(
     output_text: str,
 ) -> bool:
     original_lines = {
-        line.strip()
-        for line in original_text.splitlines()
-        if line.strip()
+        line.strip() for line in original_text.splitlines() if line.strip()
     }
     revised_only_lines = [
         line.strip()

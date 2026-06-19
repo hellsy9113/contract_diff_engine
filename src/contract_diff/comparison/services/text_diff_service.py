@@ -18,9 +18,8 @@ class TextDiffService:
     _NO_SPACE_AFTER = frozenset({"(", "[", "{"})
 
     def equivalent(self, original_text: str, revised_text: str) -> bool:
-        return (
-            normalize_for_alignment(original_text)
-            == normalize_for_alignment(revised_text)
+        return normalize_for_alignment(original_text) == normalize_for_alignment(
+            revised_text
         )
 
     def normalize_for_comparison(self, text: str) -> str:

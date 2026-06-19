@@ -11,9 +11,7 @@ DEFAULT_FRONTEND_ORIGINS = (
     "http://127.0.0.1:3000",
     "http://127.0.0.1:3001",
 )
-DEFAULT_FRONTEND_ORIGIN_REGEX = (
-    r"https://.*\.(vercel\.app|netlify\.app|onrender\.com)"
-)
+DEFAULT_FRONTEND_ORIGIN_REGEX = r"https://.*\.(vercel\.app|netlify\.app|onrender\.com)"
 
 
 def frontend_origins() -> list[str]:
@@ -23,9 +21,7 @@ def frontend_origins() -> list[str]:
         return list(DEFAULT_FRONTEND_ORIGINS)
 
     origins = [
-        origin.strip().rstrip("/")
-        for origin in configured.split(",")
-        if origin.strip()
+        origin.strip().rstrip("/") for origin in configured.split(",") if origin.strip()
     ]
     return origins or list(DEFAULT_FRONTEND_ORIGINS)
 

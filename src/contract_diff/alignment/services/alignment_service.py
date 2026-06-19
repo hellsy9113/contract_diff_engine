@@ -84,9 +84,7 @@ class AlignmentService:
         status: AlignmentStatus,
     ) -> int:
         return sum(
-            1
-            for aligned_clause in aligned_clauses
-            if aligned_clause.status is status
+            1 for aligned_clause in aligned_clauses if aligned_clause.status is status
         )
 
     def _collect_warnings(

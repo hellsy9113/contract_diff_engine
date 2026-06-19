@@ -143,9 +143,7 @@ def _report(case_results: list[JsonObject]) -> JsonObject:
 
     for check_name in check_names:
         summary[check_name] = sum(
-            1
-            for result in case_results
-            if _check_passed(result, check_name)
+            1 for result in case_results if _check_passed(result, check_name)
         )
 
     return {
@@ -189,9 +187,7 @@ def _has_highlight_when_expected(
         return annotation_counts.get("Highlight", 0) == 0
 
     revised_side_changes = [
-        change
-        for change in changes
-        if change.get("type") in {"added", "modified"}
+        change for change in changes if change.get("type") in {"added", "modified"}
     ]
 
     if not revised_side_changes:

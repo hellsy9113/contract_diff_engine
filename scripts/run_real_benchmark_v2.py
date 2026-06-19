@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import os
 from collections import Counter
 from pathlib import Path
 
@@ -32,6 +33,11 @@ def main() -> int:
         default=GLOBAL_REPORT_PATH,
         help="Path where the global benchmark_report.json will be written.",
     )
+    parser.add_argument(
+        "--debug-diff",
+        action="store_true",
+        help="Write diff-debug.json next to each generated output.pdf.",
+    )
     args = parser.parse_args()
     case_dirs = _case_dirs(args.benchmark_dir)
 
@@ -42,7 +48,8 @@ def main() -> int:
         )
         return 1
 
-    results = [run_case(case_dir) for case_dir in case_dirs]
+    debug_diff = args.debug_diff or _truthy_env("DEBUG_DIFF")
+    results = [run_case(case_dir, debug_diff=debug_diff) for case_dir in case_dirs]
     global_report = build_global_report(results)
     args.report_path.parent.mkdir(parents=True, exist_ok=True)
     write_json(args.report_path, global_report)
@@ -51,7 +58,7 @@ def main() -> int:
     return 0
 
 
-def run_case(case_dir: Path) -> JsonObject:
+def run_case(case_dir: Path, *, debug_diff: bool = False) -> JsonObject:
     original_pdf = case_dir / "original.pdf"
     revised_pdf = case_dir / "revised.pdf"
     output_pdf = case_dir / "output.pdf"
@@ -63,6 +70,12 @@ def run_case(case_dir: Path) -> JsonObject:
         output_bytes, report = compare_pdf_bytes_v2(
             original_pdf.read_bytes(),
             revised_pdf.read_bytes(),
+            original_filename=original_pdf.name,
+            revised_filename=revised_pdf.name,
+            debug=debug_diff,
+            debug_output_path=(
+                output_pdf.with_name("diff-debug.json") if debug_diff else None
+            ),
         )
         output_pdf.write_bytes(output_bytes)
         diagnostics = analyze_rendered_pdf(output_bytes)
@@ -79,9 +92,7 @@ def run_case(case_dir: Path) -> JsonObject:
             "unwanted_annotation_count": (
                 report.comparison_quality.unwanted_annotation_count
             ),
-            "dense_highlight_pages": (
-                report.comparison_quality.dense_highlight_pages
-            ),
+            "dense_highlight_pages": (report.comparison_quality.dense_highlight_pages),
             "diagnostics": diagnostics,
         }
         write_json(
@@ -219,6 +230,15 @@ def _number_value(value: object) -> float:
         return float(value)
 
     return 0.0
+
+
+def _truthy_env(name: str) -> bool:
+    value = os.getenv(name)
+
+    if value is None:
+        return False
+
+    return value.strip().casefold() in {"1", "true", "yes", "on"}
 
 
 def _integer_value(value: object) -> int:

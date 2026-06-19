@@ -32,9 +32,7 @@ def assign_section_paths(document: StructuredDocument) -> StructuredDocument:
             )
             continue
 
-        section_path_by_key[(block.page_index, block.block_index)] = list(
-            section_stack
-        )
+        section_path_by_key[(block.page_index, block.block_index)] = list(section_stack)
 
     pages: list[ExtractedPage] = []
 

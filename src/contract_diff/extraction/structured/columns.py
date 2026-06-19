@@ -46,8 +46,7 @@ def detect_columns_for_page(
         return {block.block_index: 0 for block in body_blocks}
 
     return {
-        block.block_index: 0 if block in left_blocks else 1
-        for block in body_blocks
+        block.block_index: 0 if block in left_blocks else 1 for block in body_blocks
     }
 
 

@@ -115,8 +115,7 @@ class HighlightRenderer:
 
             for rect in rects:
                 if any(
-                    rects_are_similar(rect, existing)
-                    for existing in highlight_rects
+                    rects_are_similar(rect, existing) for existing in highlight_rects
                 ):
                     continue
 

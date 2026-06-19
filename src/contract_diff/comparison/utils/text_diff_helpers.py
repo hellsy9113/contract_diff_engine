@@ -72,9 +72,13 @@ def get_changed_fragments(original_text: str, revised_text: str) -> list[str]:
     matcher = SequenceMatcher(None, original_keys, revised_keys)
     fragments: list[str] = []
 
-    for tag, _original_start, _original_end, revised_start, revised_end in (
-        matcher.get_opcodes()
-    ):
+    for (
+        tag,
+        _original_start,
+        _original_end,
+        revised_start,
+        revised_end,
+    ) in matcher.get_opcodes():
         if tag in {"equal", "delete"}:
             continue
 

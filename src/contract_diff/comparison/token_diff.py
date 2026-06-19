@@ -91,9 +91,13 @@ def diff_modified_text(original_text: str, revised_text: str) -> list[TokenChang
     matcher = SequenceMatcher(None, original_keys, revised_keys)
     changes: list[TokenChange] = []
 
-    for tag, original_start, original_end, revised_start, revised_end in (
-        matcher.get_opcodes()
-    ):
+    for (
+        tag,
+        original_start,
+        original_end,
+        revised_start,
+        revised_end,
+    ) in matcher.get_opcodes():
         original_fragment = _join_tokens(original_tokens[original_start:original_end])
         revised_fragment = _join_tokens(revised_tokens[revised_start:revised_end])
 
@@ -163,9 +167,13 @@ def get_revised_changed_fragments(
     matcher = SequenceMatcher(None, original_keys, revised_keys)
     fragments: list[str] = []
 
-    for tag, _original_start, _original_end, revised_start, revised_end in (
-        matcher.get_opcodes()
-    ):
+    for (
+        tag,
+        _original_start,
+        _original_end,
+        revised_start,
+        revised_end,
+    ) in matcher.get_opcodes():
         if tag in {"equal", "delete"}:
             continue
 

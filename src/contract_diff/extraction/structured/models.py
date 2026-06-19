@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Self
 
-from pydantic import BaseModel, ConfigDict, model_validator
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 
 class BoundingBox(BaseModel):
@@ -33,6 +33,80 @@ class ExtractedWord(BaseModel):
     word_index: int
     block_index: int | None
     line_index: int | None
+
+
+class WordToken(BaseModel):
+    model_config = ConfigDict(frozen=True)
+
+    id: str
+    text: str
+    normalized: str
+    page_number: int
+    bbox: tuple[float, float, float, float]
+    line_id: str | None
+    block_id: str | None
+    paragraph_id: str | None
+    section_heading: str | None
+    token_index: int
+
+
+class PageInfo(BaseModel):
+    model_config = ConfigDict(frozen=True)
+
+    page_number: int
+    page_index: int
+    width: float
+    height: float
+    token_start_index: int | None
+    token_end_index: int | None
+
+
+class DocumentWordStream(BaseModel):
+    model_config = ConfigDict(frozen=True)
+
+    tokens: list[WordToken]
+    pages: list[PageInfo]
+    source_file_name: str | None = None
+
+    def get_token(self, index: int) -> WordToken:
+        return self.tokens[index]
+
+    def slice_tokens(self, start: int, end: int) -> list[WordToken]:
+        return self.tokens[start:end]
+
+    def slice_text(self, start: int, end: int) -> str:
+        return " ".join(token.text for token in self.slice_tokens(start, end)).strip()
+
+    def find_nearest_surviving_anchor(
+        self,
+        index: int,
+        surviving_token_indexes: set[int] | frozenset[int],
+        *,
+        max_distance: int | None = None,
+    ) -> WordToken | None:
+        if not self.tokens or not surviving_token_indexes:
+            return None
+
+        tokens_by_index = {token.token_index: token for token in self.tokens}
+
+        if index in surviving_token_indexes:
+            return tokens_by_index.get(index)
+
+        search_limit = len(self.tokens)
+        if max_distance is not None:
+            search_limit = min(search_limit, max_distance)
+
+        for distance in range(1, search_limit + 1):
+            before_index = index - distance
+            after_index = index + distance
+
+            if before_index in surviving_token_indexes:
+                return tokens_by_index.get(before_index)
+
+            if after_index in surviving_token_indexes:
+                return tokens_by_index.get(after_index)
+
+        return None
 
 
 class TextSpan(BaseModel):
@@ -86,6 +160,7 @@ class StructuredDocument(BaseModel):
     text: str
     pages: list[ExtractedPage]
     warnings: list[str]
+    word_tokens: list[WordToken] = Field(default_factory=list)
 
 
 class PdfIntakeReport(BaseModel):

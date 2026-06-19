@@ -9,9 +9,7 @@ from tests.alignment.helpers import make_clause, make_document, make_section
 
 def test_scores_exact_documents_as_100() -> None:
     document = make_document(
-        (
-            make_clause("clause-1", "The Buyer shall pay within 30 days.", "1.1"),
-        )
+        (make_clause("clause-1", "The Buyer shall pay within 30 days.", "1.1"),)
     )
 
     result = DocumentSimilarityService().evaluate(document, document)
@@ -22,14 +20,10 @@ def test_scores_exact_documents_as_100() -> None:
 
 def test_accepts_similar_documents() -> None:
     original = make_document(
-        (
-            make_clause("orig-1", "The Buyer shall pay within 30 days.", "1.1"),
-        )
+        (make_clause("orig-1", "The Buyer shall pay within 30 days.", "1.1"),)
     )
     revised = make_document(
-        (
-            make_clause("rev-1", "The Buyer shall pay within 45 days.", "2.1"),
-        ),
+        (make_clause("rev-1", "The Buyer shall pay within 45 days.", "2.1"),),
         sections=(make_section("section-1", "Payment"),),
     )
 
@@ -41,15 +35,11 @@ def test_accepts_similar_documents() -> None:
 
 def test_rejects_unrelated_documents_without_exception() -> None:
     original = make_document(
-        (
-            make_clause("orig-1", "The employee may terminate employment.", "1.1"),
-        ),
+        (make_clause("orig-1", "The employee may terminate employment.", "1.1"),),
         sections=(make_section("section-1", "Employment"),),
     )
     revised = make_document(
-        (
-            make_clause("rev-1", "The software license is non-transferable.", "1.1"),
-        ),
+        (make_clause("rev-1", "The software license is non-transferable.", "1.1"),),
         sections=(make_section("section-1", "Software License"),),
     )
 
@@ -69,9 +59,7 @@ def test_clause_count_affects_score() -> None:
         )
     )
     revised = make_document(
-        (
-            make_clause("rev-1", "The Buyer shall pay within 30 days.", "1.1"),
-        )
+        (make_clause("rev-1", "The Buyer shall pay within 30 days.", "1.1"),)
     )
 
     result = DocumentSimilarityService().evaluate(original, revised)

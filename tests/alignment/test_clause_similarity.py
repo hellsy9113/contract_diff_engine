@@ -4,14 +4,10 @@ from tests.alignment.helpers import make_clause, make_document, make_section
 
 def test_exact_clause_numbers_match_strongly() -> None:
     original = make_document(
-        (
-            make_clause("orig-1", "The Buyer shall pay within 30 days.", "3.2"),
-        )
+        (make_clause("orig-1", "The Buyer shall pay within 30 days.", "3.2"),)
     )
     revised = make_document(
-        (
-            make_clause("rev-1", "The Buyer shall pay within 45 days.", "3.2"),
-        )
+        (make_clause("rev-1", "The Buyer shall pay within 45 days.", "3.2"),)
     )
 
     score = ClauseSimilarityScorer.score(
@@ -29,14 +25,10 @@ def test_exact_clause_numbers_match_strongly() -> None:
 
 def test_renumbered_but_similar_text_still_matches() -> None:
     original = make_document(
-        (
-            make_clause("orig-1", "The Buyer shall pay within 30 days.", "4.2"),
-        )
+        (make_clause("orig-1", "The Buyer shall pay within 30 days.", "4.2"),)
     )
     revised = make_document(
-        (
-            make_clause("rev-1", "The Buyer shall pay within 30 days.", "5.1"),
-        )
+        (make_clause("rev-1", "The Buyer shall pay within 30 days.", "5.1"),)
     )
 
     score = ClauseSimilarityScorer.score(
@@ -90,15 +82,11 @@ def test_similar_headings_improve_score() -> None:
 
 def test_different_clauses_do_not_match() -> None:
     original = make_document(
-        (
-            make_clause("orig-1", "The Buyer shall pay within 30 days.", "1.1"),
-        ),
+        (make_clause("orig-1", "The Buyer shall pay within 30 days.", "1.1"),),
         sections=(make_section("section-1", "Payment"),),
     )
     revised = make_document(
-        (
-            make_clause("rev-1", "This agreement is governed by Delaware law.", "9.1"),
-        ),
+        (make_clause("rev-1", "This agreement is governed by Delaware law.", "9.1"),),
         sections=(make_section("section-1", "Governing Law"),),
     )
 

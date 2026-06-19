@@ -13,9 +13,7 @@ def test_original_only_clause_receives_previous_matched_revised_anchor() -> None
         )
     )
     revised = make_document(
-        (
-            make_clause("rev-1", "Payment shall be made in 30 days.", "1.1"),
-        )
+        (make_clause("rev-1", "Payment shall be made in 30 days.", "1.1"),)
     )
 
     aligned = ClauseAlignmentService().align(original, revised)
@@ -32,9 +30,7 @@ def test_original_only_clause_receives_next_matched_revised_anchor() -> None:
         )
     )
     revised = make_document(
-        (
-            make_clause("rev-1", "Payment shall be made in 30 days.", "1.2"),
-        )
+        (make_clause("rev-1", "Payment shall be made in 30 days.", "1.2"),)
     )
 
     aligned = ClauseAlignmentService().align(original, revised)
@@ -45,9 +41,7 @@ def test_original_only_clause_receives_next_matched_revised_anchor() -> None:
 
 def test_original_only_clause_warns_when_no_revised_anchor_exists() -> None:
     original = make_document(
-        (
-            make_clause("orig-1", "Supplier shall maintain insurance.", "1.1"),
-        )
+        (make_clause("orig-1", "Supplier shall maintain insurance.", "1.1"),)
     )
     revised = make_document(())
 

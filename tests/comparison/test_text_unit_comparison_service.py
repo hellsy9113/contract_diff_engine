@@ -67,10 +67,7 @@ def test_changed_fragments_exclude_unchanged_text_inside_modified_line() -> None
 
 def test_insertion_inside_long_paragraph_does_not_return_full_paragraph() -> None:
     fragments = get_changed_fragments(
-        (
-            "Sentence one remains. Sentence two remains. "
-            "Sentence three remains."
-        ),
+        ("Sentence one remains. Sentence two remains. Sentence three remains."),
         (
             "Sentence one remains. Added sentence appears here. "
             "Sentence two remains. Sentence three remains."
@@ -105,12 +102,8 @@ def test_pagination_shift_is_aligned_globally_without_false_modifications() -> N
 
 
 def test_similar_replace_becomes_modification() -> None:
-    original = make_document(
-        (make_unit("orig-1", "Payment is due within 30 days."),)
-    )
-    revised = make_document(
-        (make_unit("rev-1", "Payment is due within 45 days."),)
-    )
+    original = make_document((make_unit("orig-1", "Payment is due within 30 days."),))
+    revised = make_document((make_unit("rev-1", "Payment is due within 45 days."),))
 
     result = TextUnitComparisonService().compare(original, revised)
 
@@ -135,12 +128,8 @@ def test_unrelated_replace_becomes_delete_and_insert() -> None:
 
 
 def test_whitespace_only_changes_are_ignored() -> None:
-    original = make_document(
-        (make_unit("orig-1", "Payment is due within 30 days."),)
-    )
-    revised = make_document(
-        (make_unit("rev-1", "Payment   is due\nwithin 30 days."),)
-    )
+    original = make_document((make_unit("orig-1", "Payment is due within 30 days."),))
+    revised = make_document((make_unit("rev-1", "Payment   is due\nwithin 30 days."),))
 
     result = TextUnitComparisonService().compare(original, revised)
 

@@ -250,7 +250,7 @@ class ContractDiffEngine:
                     "original_text": compared_clause.original_text,
                     "revised_text": compared_clause.revised_text,
                     "revised_spans": compared_clause.revised_source_span_ids,
-                }
+                },
             )
             printed += 1
 

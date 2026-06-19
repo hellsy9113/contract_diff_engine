@@ -50,8 +50,7 @@ def test_default_cors_allows_common_deployment_frontend_origin() -> None:
     assert response["status"] == 200
     headers = response["headers"]
     assert (
-        headers["access-control-allow-origin"]
-        == "https://contract-diff-ui.vercel.app"
+        headers["access-control-allow-origin"] == "https://contract-diff-ui.vercel.app"
     )
     assert headers["access-control-allow-credentials"] == "true"
     assert "Content-Disposition" in headers["access-control-expose-headers"]
