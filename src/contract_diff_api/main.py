@@ -5,7 +5,6 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from contract_diff_api.routes.compare import router as compare_router
 
-
 app = FastAPI(
     title="Contract Diff API",
     version="0.1.0",
